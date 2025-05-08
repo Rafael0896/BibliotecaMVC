@@ -72,9 +72,27 @@ public class MainFrame extends JFrame {
         return menuBar;
     }
 
+    /*
+    Esta parte del código Swing de Java pertenece al estilo que
+    se le quiera dar a la aplicación.
+    */
     public static void main(String[] args) {
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            // Probar con el Look and Feel Nimbus (moderno)
+            UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+
+            // Probar con el Look and Feel Metal (el predeterminado multiplataforma)
+            // UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+
+            // Probar con el Look and Feel clásico de Motif
+            // UIManager.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
+
+            // Probar con el Look and Feel de Windows (si estás en Windows)
+            // UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+
+            // Probar con el Look and Feel de GTK (si estás en Linux con GTK)
+            // UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
+
         } catch (Exception e) {
             e.printStackTrace();
         }

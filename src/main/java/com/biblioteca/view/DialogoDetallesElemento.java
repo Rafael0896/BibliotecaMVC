@@ -1,89 +1,113 @@
-// Vista: DialogoDetallesElemento.java
 package com.biblioteca.view;
 
+import com.biblioteca.model.DVD;
 import com.biblioteca.model.ElementoBiblioteca;
 import com.biblioteca.model.Libro;
-import com.biblioteca.model.DVD;
 import com.biblioteca.model.Revista;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class DialogoDetallesElemento extends JDialog {
-    private MainFrame parent;
     private ElementoBiblioteca elemento;
 
-    private JLabel lblTituloValor;
-    private JLabel lblAutorValor;
-    private JLabel lblAnoPublicacionValor;
-    private JPanel panelDetallesEspecificos;
-
     public DialogoDetallesElemento(MainFrame parent, ElementoBiblioteca elemento) {
-        super(parent, "Detalles del Elemento", true);
-        this.parent = parent;
+        super(parent, "Detalles de " + obtenerTipoElemento(elemento), true);
         this.elemento = elemento;
+
         inicializarComponentes();
-        mostrarDetalles();
-        setSize(400, 300);
-        setLocationRelativeTo(parent);
-        setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        configurarVentana();
+    }
+
+    private static String obtenerTipoElemento(ElementoBiblioteca elemento) {
+        if (elemento instanceof Libro) {
+            return "Libro";
+        } else if (elemento instanceof Revista) {
+            return "Revista";
+        } else if (elemento instanceof DVD) {
+            return "DVD";
+        } else {
+            return "Elemento";
+        }
     }
 
     private void inicializarComponentes() {
-        setLayout(new BorderLayout(10, 10));
-        JPanel panelGeneral = new JPanel(new GridLayout(0, 2, 5, 5));
+        // Panel principal con GridBagLayout
+        JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.WEST;
 
-        panelGeneral.add(new JLabel("Título:", SwingConstants.RIGHT));
-        lblTituloValor = new JLabel();
-        panelGeneral.add(lblTituloValor);
+        // Mostrar detalles comunes
+        addAtributo(panel, gbc, 0, "ID:", String.valueOf(elemento.getId()));
+        addAtributo(panel, gbc, 1, "Título:", elemento.getTitulo());
+        addAtributo(panel, gbc, 2, "Autor:", elemento.getAutor());
+        addAtributo(panel, gbc, 3, "Año:", String.valueOf(elemento.getAnoPublicacion()));
+        addAtributo(panel, gbc, 4, "Tipo:", elemento.getTipo());
 
-        panelGeneral.add(new JLabel("Autor:", SwingConstants.RIGHT));
-        lblAutorValor = new JLabel();
-        panelGeneral.add(lblAutorValor);
-
-        panelGeneral.add(new JLabel("Año de Publicación:", SwingConstants.RIGHT));
-        lblAnoPublicacionValor = new JLabel();
-        panelGeneral.add(lblAnoPublicacionValor);
-
-        panelDetallesEspecificos = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panelGeneral.add(new JLabel("Detalles:", SwingConstants.RIGHT));
-        panelGeneral.add(panelDetallesEspecificos);
-
-        add(panelGeneral, BorderLayout.CENTER);
-
-        JButton btnCerrar = new JButton("Cerrar");
-        btnCerrar.addActionListener(e -> dispose());
-        JPanel panelBoton = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        panelBoton.add(btnCerrar);
-        add(panelBoton, BorderLayout.SOUTH);
-    }
-
-    private void mostrarDetalles() {
-        lblTituloValor.setText(elemento.getTitulo());
-        lblAutorValor.setText(elemento.getAutor());
-        lblAnoPublicacionValor.setText(String.valueOf(elemento.getAnoPublicacion()));
-
-        panelDetallesEspecificos.removeAll();
-        panelDetallesEspecificos.setLayout(new BoxLayout(panelDetallesEspecificos, BoxLayout.Y_AXIS));
+        // Mostrar detalles específicos según el tipo
+        int row = 5;
 
         if (elemento instanceof Libro) {
             Libro libro = (Libro) elemento;
-            panelDetallesEspecificos.add(new JLabel("ISBN: " + libro.getIsbn()));
-            panelDetallesEspecificos.add(new JLabel("Género: " + libro.getGenero()));
+            addAtributo(panel, gbc, row++, "ISBN:", libro.getIsbn());
+            addAtributo(panel, gbc, row++, "Páginas:", String.valueOf(libro.getNumeroPaginas()));
+            addAtributo(panel, gbc, row++, "Género:", libro.getGenero());
+            addAtributo(panel, gbc, row++, "Editorial:", libro.getEditorial());
         } else if (elemento instanceof Revista) {
             Revista revista = (Revista) elemento;
-            panelDetallesEspecificos.add(new JLabel("Edición: " + revista.getNumeroEdicion()));
-            panelDetallesEspecificos.add(new JLabel("Categoría: " + revista.getCategoria()));
+            addAtributo(panel, gbc, row++, "Edición:", String.valueOf(revista.getNumeroEdicion()));
+            addAtributo(panel, gbc, row++, "Categoría:", revista.getCategoria());
         } else if (elemento instanceof DVD) {
             DVD dvd = (DVD) elemento;
-            panelDetallesEspecificos.add(new JLabel("Duración: " + dvd.getDuracion() + " minutos"));
-            panelDetallesEspecificos.add(new JLabel("Género: " + dvd.getGenero()));
+            addAtributo(panel, gbc, row++, "Duración:", dvd.getDuracion() + " min");
+            addAtributo(panel, gbc, row++, "Género:", dvd.getGenero());
         }
 
-        panelDetallesEspecificos.revalidate();
-        panelDetallesEspecificos.repaint();
+        // Botón cerrar
+        JButton btnCerrar = new JButton("Cerrar");
+        btnCerrar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+            }
+        });
+
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        panelBotones.add(btnCerrar);
+
+        // Panel principal
+        JPanel panelPrincipal = new JPanel(new BorderLayout(10, 10));
+        panelPrincipal.add(panel, BorderLayout.CENTER);
+        panelPrincipal.add(panelBotones, BorderLayout.SOUTH);
+        panelPrincipal.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        setContentPane(panelPrincipal);
     }
 
-    public void mostrar() {
-        setVisible(true);
+    private void addAtributo(JPanel panel, GridBagConstraints gbc, int row, String etiqueta, String valor) {
+        JLabel lblEtiqueta = new JLabel(etiqueta);
+        lblEtiqueta.setFont(lblEtiqueta.getFont().deriveFont(Font.BOLD));
+
+        JLabel lblValor = new JLabel(valor);
+
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.gridwidth = 1;
+        gbc.weightx = 0.3;
+        panel.add(lblEtiqueta, gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 0.7;
+        panel.add(lblValor, gbc);
+    }
+
+    private void configurarVentana() {
+        pack();
+        setResizable(false);
+        setLocationRelativeTo(getOwner());
     }
 }

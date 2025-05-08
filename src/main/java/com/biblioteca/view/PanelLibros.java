@@ -8,7 +8,10 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.SQLException;
 import java.util.List;
-
+/**
+ * Panel para la gestión de libros
+ * Permite buscar, agregar, editar y eliminar libros
+ */
 public class PanelLibros extends JPanel {
     private MainFrame parent;
     private LibroController controller;
